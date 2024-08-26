@@ -1,5 +1,6 @@
 package com.example.movieapi.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -11,8 +12,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.movieapi.R
 import com.example.movieapi.data.DataSource
-import com.example.movieapi.ui.MovieScreens
 import com.example.movieapi.ui.screens.movieDetails.MovieDetailsScreen
 import com.example.movieapi.ui.screens.movieDetails.MovieDetailsViewModel
 import com.example.movieapi.ui.screens.popularMovies.PopularMoviesScreen
@@ -44,12 +45,28 @@ fun Navigation(modifier: Modifier,navController: NavHostController) {
             val movieDetailsViewModel: MovieDetailsViewModel = hiltViewModel()
             val movieDetailsUiState by movieDetailsViewModel.movieDetailsUiState.collectAsStateWithLifecycle()
 
+            //parsing the id as a string
             val movieId = entry.arguments?.getString("id") ?: "533535"
             movieDetailsViewModel.getMovieDetailsById(movieId.toInt(), DataSource.API_KEY)
             MovieDetailsScreen(movieDetailsResponse = movieDetailsUiState.movieDetailsResponse,movieDetailsUiState.showDialog,movieDetailsViewModel::hideDialog,movieDetailsViewModel::showDialog)
         }
     }
 }
+
+sealed class MovieScreens(val route: String, @StringRes val titleResource: Int) {
+    data object PopularMovies : MovieScreens("Popular Movies", R.string.popular_movies)
+    data object MovieDetail : MovieScreens("Movie Details", R.string.movie_detail)
+
+    fun withArgs(vararg args: String): String {
+        return buildString {
+            append(route)
+            args.forEach { arg ->
+                append("/$arg")
+            }
+        }
+    }
+}
+
 
 fun NavHostController.navigateSingleTopTo(route: String) =
     this.navigate(route) {
@@ -62,9 +79,9 @@ fun NavHostController.navigateSingleTopTo(route: String) =
             saveState = true
         }
         // Avoid multiple copies of the same destination when
-        // reselecting the same item
+        // reelecting the same item
         launchSingleTop = true
-        // Restore state when reselecting a previously selected item
+        // Restore state when reelecting a previously selected item
         restoreState = true
     }
 

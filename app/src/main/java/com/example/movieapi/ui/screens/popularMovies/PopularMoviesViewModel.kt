@@ -1,5 +1,6 @@
 package com.example.movieapi.ui.screens.popularMovies
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapi.data.DataSource
@@ -21,7 +22,13 @@ class PopularMoviesViewModel @Inject constructor(
     val popularMoviesUiState = _popularMoviesUiState.asStateFlow()
 
     init {
+        Log.d("MyTag","Popular started")
         getPopularMoviesUiState(DataSource.API_KEY)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.d("MyTag","Popular Cleared")
     }
 
     private fun getPopularMoviesUiState(apiKey: String) {

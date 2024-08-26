@@ -1,6 +1,5 @@
 package com.example.movieapi.ui
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,7 +21,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.movieapi.R
+import com.example.movieapi.ui.navigation.MovieScreens
 import com.example.movieapi.ui.navigation.Navigation
+import com.example.movieapi.ui.navigation.navigateSingleTopTo
 import com.example.movieapi.ui.theme.ScreenBackground
 
 
@@ -31,6 +32,8 @@ fun HomeScreen() {
     val navHostController = rememberNavController()
     // Get current back stack entry
     val backStackEntry by navHostController.currentBackStackEntryAsState()
+
+    //all this section is used for topBar to get the title for it
 
     // Retrieve the current route from the back stack entry, or default to the Amphibians screen if null
     val route =
@@ -47,11 +50,12 @@ fun HomeScreen() {
 
         // Add more cases if there are additional screens with different static routes
         // For example:
-        // route == DataSource.AmphibianScreen.OtherScreen.name -> DataSource.AmphibianScreen.OtherScreen
+        // route == MovieScreens.OtherScreen.route -> MovieScreens.OtherScreen
 
         // Default case: if none of the specific routes match, fall back to the default screen
         else -> MovieScreens.PopularMovies
     }
+
     Scaffold(
         topBar = {
             AppBar(
@@ -104,16 +108,3 @@ fun AppBar(
     )
 }
 
-sealed class MovieScreens(val route: String, @StringRes val titleResource: Int) {
-    data object PopularMovies : MovieScreens("Popular Movies", R.string.popular_movies)
-    data object MovieDetail : MovieScreens("Movie Details", R.string.movie_detail)
-
-    fun withArgs(vararg args: String): String {
-        return buildString {
-            append(route)
-            args.forEach { arg ->
-                append("/$arg")
-            }
-        }
-    }
-}

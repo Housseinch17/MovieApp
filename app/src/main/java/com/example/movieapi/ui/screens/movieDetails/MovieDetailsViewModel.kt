@@ -1,5 +1,6 @@
 package com.example.movieapi.ui.screens.movieDetails
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapi.data.model.Result
@@ -19,6 +20,16 @@ class MovieDetailsViewModel @Inject constructor(
 ) : ViewModel() {
     private val _movieDetailsUiState = MutableStateFlow(MovieDetailsUiState())
     val movieDetailsUiState: StateFlow<MovieDetailsUiState> = _movieDetailsUiState.asStateFlow()
+
+
+    init {
+        Log.d("MyTag","Details Started")
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.d("MyTag","Details Cleared")
+    }
 
     fun showDialog(){
         _movieDetailsUiState.update {
