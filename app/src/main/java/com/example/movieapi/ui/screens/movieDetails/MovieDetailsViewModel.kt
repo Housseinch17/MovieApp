@@ -46,10 +46,10 @@ class MovieDetailsViewModel @Inject constructor(
     fun getMovieDetailsById(movieId: Int, apiKey: String) {
         viewModelScope.launch {
             val movieDetails: Result? = getMovieDetailsUseCase.execute(movieId, apiKey)
-            val movieDetailsResponse: MovieDetailsResponse = if (movieDetails == null)
-                MovieDetailsResponse.Error
-            else {
+            val movieDetailsResponse: MovieDetailsResponse = if (movieDetails != null)
                 MovieDetailsResponse.Success(movieDetails)
+            else {
+                MovieDetailsResponse.Error
             }
             _movieDetailsUiState.update {
                 it.copy(

@@ -4,17 +4,21 @@ import android.util.Log
 import com.example.movieapi.data.datasource.movieDetails.impl.MovieDetailsDataSourceImpl
 import com.example.movieapi.data.model.Result
 import com.example.movieapi.domain.repository.MovieDetailsRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import javax.inject.Inject
 
 class MovieDetailsRepositoryImpl @Inject constructor(
-    private val movieDetailsDataSourceImpl: MovieDetailsDataSourceImpl
+    private val movieDetailsDataSourceImpl: MovieDetailsDataSourceImpl,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): MovieDetailsRepository {
     override suspend fun getMovieDetails(movieId: Int, apiKey: String): Result? {
         return getMovieDetailsFromApi(movieId,apiKey)
     }
 
-    private suspend fun getMovieDetailsFromApi(movieId: Int, apiKey: String): Result? {
+    private suspend fun getMovieDetailsFromApi(movieId: Int, apiKey: String): Result? = withContext(ioDispatcher){
             var movieDetails: Result? = null
             try{
                 movieDetails = movieDetailsDataSourceImpl.getMovieDetails(movieId,apiKey)
@@ -23,6 +27,6 @@ class MovieDetailsRepositoryImpl @Inject constructor(
             } catch (e: HttpException) {
                 Log.i("MyTag", "getMovieDetailsFromApi() exception: " + e.message.toString())
             }
-            return movieDetails
+            return@withContext movieDetails
     }
 }
