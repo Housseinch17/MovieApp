@@ -19,6 +19,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +41,7 @@ import com.example.movieapi.ui.theme.MovieDetailDescriptionColor
 import com.example.movieapi.ui.theme.MovieDetailText
 import com.example.movieapi.ui.theme.MovieTitle
 import com.example.movieapi.ui.theme.ScreenBackground
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun MovieDetailsScreen(
@@ -67,18 +70,19 @@ fun MovieDetailsScreen(
 @Composable
 fun MovieDetailsModel(
     modifier: Modifier,
-    result: Result?,
+    result: Flow<Result?>,
     onShowDialog: Boolean,
     hideDialog: () -> Unit,
     showDialog: () -> Unit
 ) {
-    if (result != null) {
+    val resultResponse by result.collectAsState(initial = null)
+    if (resultResponse != null) {
         Box(
             modifier = modifier, contentAlignment = Alignment.Center
         ) {
             MovieImage(
                 modifier = Modifier.fillMaxSize(),
-                imageSrc = result.belongsToCollection?.backdropPath
+                imageSrc = resultResponse!!.belongsToCollection?.backdropPath
             )
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -90,15 +94,15 @@ fun MovieDetailsModel(
                         .width(200.dp)
                         .height(250.dp)
                         .clip(RoundedCornerShape(dimensionResource(id = R.dimen.small_padding))),
-                    imageSrc = result.posterPath
+                    imageSrc = resultResponse!!.posterPath
                 )
                 if (onShowDialog)
-                    MovieDetailDialog(result.overview, hideDialog)
+                    MovieDetailDialog(resultResponse!!.overview, hideDialog)
                 MovieDetailsBottom(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(dimensionResource(id = R.dimen.small_padding))),
-                    result = result,
+                    result = resultResponse,
                     showDialog = showDialog
                 )
             }

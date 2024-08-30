@@ -20,6 +20,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,18 +38,20 @@ import com.example.movieapi.ui.sharedComponent.MovieImage
 import com.example.movieapi.ui.theme.MovieText
 import com.example.movieapi.ui.theme.MovieTitle
 import com.example.movieapi.ui.theme.ScreenBackground
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun PopularMoviesScreen(apiResponse: ApiResponse, onItemClick: (String) -> Unit) {
     when (apiResponse) {
-        is ApiResponse.Success -> MovieList(
+        is ApiResponse.Success ->
+            MovieList(
             modifier = Modifier
                 .fillMaxSize()
                 .background(ScreenBackground)
                 .padding(
                     horizontal = dimensionResource(id = R.dimen.small_padding),
                 ),
-            apiResponse.responseResult,
+                apiResponse.responseResult,
         ) { id ->
             onItemClick(id.toString())
         }
@@ -56,14 +60,14 @@ fun PopularMoviesScreen(apiResponse: ApiResponse, onItemClick: (String) -> Unit)
         is ApiResponse.Loading -> LoadingScreen(
         )
     }
-
 }
 
 
 @Composable
 fun MovieList(
-    modifier: Modifier, responseResult: List<Result>, onItemClick: (Int) -> Unit
+    modifier: Modifier, responseResult: Flow<List<Result>>, onItemClick: (Int) -> Unit
 ) {
+    val response by responseResult.collectAsState(initial = emptyList())
     VerticalDivider(modifier = Modifier.height(dimensionResource(id = R.dimen.medium_padding)))
     LazyColumn(
         modifier = modifier, verticalArrangement = Arrangement.spacedBy(40.dp),
@@ -72,7 +76,7 @@ fun MovieList(
             bottom = dimensionResource(id = R.dimen.medium_padding)
         )
     ) {
-        items(responseResult) { result ->
+        items(response) { result ->
             MovieItem(
                 modifier = Modifier
                     .fillMaxWidth()

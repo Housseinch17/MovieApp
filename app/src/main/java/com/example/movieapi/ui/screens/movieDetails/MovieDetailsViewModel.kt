@@ -7,9 +7,11 @@ import com.example.movieapi.data.model.Result
 import com.example.movieapi.data.uiState.MovieDetailsUiState
 import com.example.movieapi.domain.usecase.GetMovieDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -45,8 +47,8 @@ class MovieDetailsViewModel @Inject constructor(
 
     fun getMovieDetailsById(movieId: Int, apiKey: String) {
         viewModelScope.launch {
-            val movieDetails: Result? = getMovieDetailsUseCase.execute(movieId, apiKey)
-            val movieDetailsResponse: MovieDetailsResponse = if (movieDetails != null)
+            val movieDetails: Flow<Result?> = getMovieDetailsUseCase.execute(movieId, apiKey)
+            val movieDetailsResponse: MovieDetailsResponse = if (movieDetails != emptyFlow<Result?>())
                 MovieDetailsResponse.Success(movieDetails)
             else {
                 MovieDetailsResponse.Error
@@ -61,7 +63,7 @@ class MovieDetailsViewModel @Inject constructor(
 }
 
 sealed interface MovieDetailsResponse {
-    data class Success(val movieDetails: Result?) : MovieDetailsResponse
+    data class Success(val movieDetails: Flow<Result?>) : MovieDetailsResponse
     data object Loading : MovieDetailsResponse
     data object Error : MovieDetailsResponse
 }

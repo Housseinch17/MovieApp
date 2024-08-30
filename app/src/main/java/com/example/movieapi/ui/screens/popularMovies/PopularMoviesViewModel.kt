@@ -8,8 +8,10 @@ import com.example.movieapi.data.model.Result
 import com.example.movieapi.data.uiState.PopularMoviesUiState
 import com.example.movieapi.domain.usecase.GetPopularMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,7 +38,9 @@ class PopularMoviesViewModel @Inject constructor(
             _popularMoviesUiState.update {
                 val responseResult = getPopularMoviesUseCase.execute(apiKey)
                 val apiResponse: ApiResponse =
-                    if (responseResult.isNotEmpty()) ApiResponse.Success(responseResult)
+                    if (responseResult != emptyFlow<List<Result>>()){
+                        ApiResponse.Success(responseResult)
+                    }
                     else {
                         ApiResponse.Error
                     }
@@ -49,7 +53,7 @@ class PopularMoviesViewModel @Inject constructor(
 }
 
 sealed interface ApiResponse{
-    data class Success(val responseResult: List<Result>): ApiResponse
+    data class Success(val responseResult: Flow<List<Result>>): ApiResponse
     data object Loading: ApiResponse
     data object Error: ApiResponse
 }
