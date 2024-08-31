@@ -8,63 +8,56 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.example.movieapi.R
 import com.example.movieapi.data.DataSource
 import com.example.movieapi.ui.screens.movieDetails.MovieDetailsScreen
 import com.example.movieapi.ui.screens.movieDetails.MovieDetailsViewModel
 import com.example.movieapi.ui.screens.popularMovies.PopularMoviesScreen
 import com.example.movieapi.ui.screens.popularMovies.PopularMoviesViewModel
+import kotlinx.serialization.Serializable
 
 
 @Composable
 fun Navigation(modifier: Modifier,navController: NavHostController) {
 
     NavHost(
-        navController = navController, startDestination = MovieScreens.PopularMovies.route,
+        navController = navController, startDestination = MovieScreens.PopularMovies,
         modifier = modifier
     ) {
-        composable(route = MovieScreens.PopularMovies.route) {
+        composable<MovieScreens.PopularMovies> {
             val moviesViewModel: PopularMoviesViewModel = hiltViewModel()
             val moviesUiState by moviesViewModel.popularMoviesUiState.collectAsStateWithLifecycle()
             PopularMoviesScreen(apiResponse = moviesUiState.apiResponse) { id ->
-                navController.navigateSingleTopTo(MovieScreens.MovieDetail.withArgs(id))
+                navController.navigate(MovieScreens.MovieDetail(
+                    id = id
+                ))
             }
         }
 
-        composable(route = MovieScreens.MovieDetail.route + "/{id}",
-            arguments = listOf(
-                navArgument("id") {
-                    type = NavType.StringType
-                }
-            )
-        ) { entry ->
+        composable<MovieScreens.MovieDetail> { entry ->
+            val args = entry.toRoute<MovieScreens.MovieDetail>()
             val movieDetailsViewModel: MovieDetailsViewModel = hiltViewModel()
             val movieDetailsUiState by movieDetailsViewModel.movieDetailsUiState.collectAsStateWithLifecycle()
 
             //parsing the id as a string
-            val movieId = entry.arguments?.getString("id") ?: "533535"
+            val movieId = args.id
             movieDetailsViewModel.getMovieDetailsById(movieId.toInt(), DataSource.API_KEY)
             MovieDetailsScreen(movieDetailsResponse = movieDetailsUiState.movieDetailsResponse,movieDetailsUiState.showDialog,movieDetailsViewModel::hideDialog,movieDetailsViewModel::showDialog)
         }
     }
 }
 
-sealed class MovieScreens(val route: String, @StringRes val titleResource: Int) {
-    data object PopularMovies : MovieScreens("Popular Movies", R.string.popular_movies)
-    data object MovieDetail : MovieScreens("Movie Details", R.string.movie_detail)
 
-    fun withArgs(vararg args: String): String {
-        return buildString {
-            append(route)
-            args.forEach { arg ->
-                append("/$arg")
-            }
-        }
-    }
+@Serializable
+sealed class MovieScreens(val route: String, @StringRes val titleResource: Int) {
+    @Serializable
+    data object PopularMovies : MovieScreens("Popular Movies", R.string.popular_movies)
+
+    @Serializable
+    data class MovieDetail(val id: String) : MovieScreens("Movie Details", R.string.movie_detail)
 }
 
 

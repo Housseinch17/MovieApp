@@ -1,5 +1,6 @@
 package com.example.movieapi.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,7 +24,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.movieapi.R
 import com.example.movieapi.ui.navigation.MovieScreens
 import com.example.movieapi.ui.navigation.Navigation
-import com.example.movieapi.ui.navigation.navigateSingleTopTo
 import com.example.movieapi.ui.theme.ScreenBackground
 
 
@@ -35,26 +35,11 @@ fun HomeScreen() {
 
     //all this section is used for topBar to get the title for it
 
-    // Retrieve the current route from the back stack entry, or default to the Amphibians screen if null
+    // Retrieve the current route from the back stack entry, or default to the PopularMovies screen if null
     val route =
         backStackEntry?.destination?.route ?: MovieScreens.PopularMovies.route
 
-    // Determine the current screen based on the route
-    val currentScreen = when {
-        // Check if the route starts with the base name for the AmphibianDetail screen.
-        // This handles routes with dynamic parameters like "MovieDetail/12312" cause here in MovieDetail there is an argument .
-        route.startsWith(MovieScreens.MovieDetail.route) -> MovieScreens.MovieDetail
-
-        // Check if the route exactly matches the name for the Amphibians screen.
-        route == MovieScreens.PopularMovies.route -> MovieScreens.PopularMovies
-
-        // Add more cases if there are additional screens with different static routes
-        // For example:
-        // route == MovieScreens.OtherScreen.route -> MovieScreens.OtherScreen
-
-        // Default case: if none of the specific routes match, fall back to the default screen
-        else -> MovieScreens.PopularMovies
-    }
+    val currentScreen = getScreenFromRoute(route)
 
     Scaffold(
         topBar = {
@@ -106,5 +91,17 @@ fun AppBar(
             }
         },
     )
+}
+
+fun getScreenFromRoute(route: String): MovieScreens {
+    return when {
+        route == MovieScreens.PopularMovies.route -> MovieScreens.PopularMovies
+        route.startsWith("Movie Details") -> {
+            // Extract the ID from the route if needed
+            val id = route.substringAfterLast("/")
+            MovieScreens.MovieDetail(id)
+        }
+        else -> MovieScreens.PopularMovies // Default case or handle unknown route
+    }
 }
 
